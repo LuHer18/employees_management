@@ -94,7 +94,17 @@ class EmployeeController extends Controller
 
     public function index(Request $request)
     {
-        $query = Employee::with('department', 'role');
+        $query = Employee::selectRaw('employees.*,
+                CASE
+                WHEN department_id IS NULL THEN NULL
+                WHEN salary > (SELECT AVG(salary) FROM employees WHERE department_id = employees.department_id)
+                THEN true
+                ELSE false
+                END AS is_above_average,
+                departments.name AS department_name,
+                roles.role_name AS role_name')
+                ->leftJoin('departments', 'employees.department_id', '=', 'departments.id')
+                ->leftJoin('roles', 'employees.role_id', '=', 'roles.id');
 
         if ($request->has('name')) {
             $query->where('name', 'like', '%' . $request->name . '%');
@@ -222,7 +232,18 @@ class EmployeeController extends Controller
 
     public function show($id)
     {
-        $employee = Employee::with('department', 'role')->find($id);
+        $employee = Employee::selectRaw('employees.*,
+            CASE
+            WHEN department_id IS NULL THEN NULL
+            WHEN salary > (SELECT AVG(salary) FROM employees WHERE department_id = employees.department_id)
+            THEN true
+            ELSE false
+            END AS is_above_average,
+            departments.name AS department_name,
+            roles.role_name AS role_name')
+            ->leftJoin('departments', 'employees.department_id', '=', 'departments.id')
+            ->leftJoin('roles', 'employees.role_id', '=', 'roles.id')->find($id);
+
         if (!$employee) {
             $data = [
                 'message' => 'Empleado no encontrado',
