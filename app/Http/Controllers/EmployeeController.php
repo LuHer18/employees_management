@@ -6,10 +6,92 @@ use App\Models\Employee;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
+
+/**
+ * @OA\Info(
+ *     title="API de Gestión de Empleados",
+ *     version="1.0.0",
+ *     description="API para la gestión de empleados"
+ * )
+ * @OA\Server(url="http://127.0.0.1:8000")
+ */
+
+
+
 class EmployeeController extends Controller
 {
 
-    //getAll() and filter by name or department
+
+    /**
+     * @OA\Get(
+     *     path="/api/employees",
+     *     tags={"Empleados"},
+     *     summary="Obtener la lista de empleados",
+     *     description="Obtiene la lista de empleados, permite filtrar por nombre y departamento.",
+     *     operationId="getEmployees",
+     *     @OA\Parameter(
+     *         name="name",
+     *         in="query",
+     *         description="Filtrar empleados por nombre",
+     *         required=false,
+     *         @OA\Schema(
+     *             type="string",
+     *             example="John"
+     *         )
+     *     ),
+     *     @OA\Parameter(
+     *         name="department_id",
+     *         in="query",
+     *         description="Filtrar empleados por ID de departamento",
+     *         required=false,
+     *         @OA\Schema(
+     *             type="integer",
+     *             example=1
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Lista de empleados obtenida exitosamente",
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(
+     *                 property="data",
+     *                 type="array",
+     *                 @OA\Items(
+     *                     type="object",
+     *                     @OA\Property(property="id", type="integer", example=1),
+     *                     @OA\Property(property="name", type="string", example="John Doe"),
+     *                     @OA\Property(property="email", type="string", example="john.doe@example.com"),
+     *                     @OA\Property(property="position", type="string", example="Desarrollador"),
+     *                     @OA\Property(property="salary", type="number", example="50000"),
+     *                     @OA\Property(property="hire_date", type="string", format="date", example="2023-09-01"),
+     *                     @OA\Property(property="department", type="object",
+     *                         @OA\Property(property="id", type="integer", example=1),
+     *                         @OA\Property(property="name", type="string", example="Recursos Humanos")
+     *                     ),
+     *                     @OA\Property(property="role", type="object",
+     *                         @OA\Property(property="id", type="integer", example=1),
+     *                         @OA\Property(property="name", type="string", example="Manager")
+     *                     )
+     *                 )
+     *             ),
+     *             @OA\Property(property="links", type="object",
+     *                 @OA\Property(property="first", type="string", example="http://localhost:8000/api/employees?page=1"),
+     *                 @OA\Property(property="last", type="string", example="http://localhost:8000/api/employees?page=5"),
+     *                 @OA\Property(property="prev", type="string", example=null),
+     *                 @OA\Property(property="next", type="string", example="http://localhost:8000/api/employees?page=2")
+     *             ),
+     *             @OA\Property(property="meta", type="object",
+     *                 @OA\Property(property="current_page", type="integer", example=1),
+     *                 @OA\Property(property="last_page", type="integer", example=5),
+     *                 @OA\Property(property="per_page", type="integer", example=10),
+     *                 @OA\Property(property="total", type="integer", example=50)
+     *             )
+     *         )
+     *     )
+     * )
+     */
+
     public function index(Request $request)
     {
         $query = Employee::with('department', 'role');
@@ -27,7 +109,51 @@ class EmployeeController extends Controller
         return response()->json($employees, 200);
     }
 
-    //create employee
+    /**
+     * @OA\Post(
+     *     path="/api/employees",
+     *     summary="Crear un nuevo empleado",
+     *     tags={"Empleados"},
+     *     description="Crear un empleado con los datos proporcionados.",
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"name", "email", "position", "salary", "hire_date"},
+     *             @OA\Property(property="name", type="string", example="John Doe"),
+     *             @OA\Property(property="email", type="string", format="email", example="johndoe@example.com"),
+     *             @OA\Property(property="position", type="string", example="Desarrollador Senior"),
+     *             @OA\Property(property="salary", type="number", example=50000.50),
+     *             @OA\Property(property="hire_date", type="string", format="date", example="2024-09-15"),
+     *             @OA\Property(property="department_id", type="integer", nullable=true, example=3),
+     *             @OA\Property(property="role_id", type="integer", nullable=true, example=2)
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=201,
+     *         description="Empleado creado con éxito",
+     *         @OA\JsonContent(
+     * type="object",
+     *             @OA\Property(property="name", type="string", example="John Doe"),
+     *             @OA\Property(property="email", type="string", example="johndoe@example.com"),
+     *             @OA\Property(property="position", type="string", example="Desarrollador Senior"),
+     *             @OA\Property(property="salary", type="number", example=50000.50),
+     *             @OA\Property(property="hire_date", type="string", format="date", example="2024-09-15"),
+     *             @OA\Property(property="department_id", type="integer", example=1),
+     *             @OA\Property(property="role_id", type="integer", example=2))
+     *     ),
+     *     @OA\Response(
+     *         response=400,
+     *         description="Error en la validación de los datos",
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(property="message", type="string", example="Error en la validación de datos"),
+     *             @OA\Property(property="errors", type="object"),
+     *             @OA\Property(property="status", type="integer", example=400)
+     *         )
+     *     )
+     * )
+     */
+
     public function store(Request $request)
     {
 
@@ -55,6 +181,45 @@ class EmployeeController extends Controller
         return response()->json($employee, 201);
     }
 
+    /**
+     * @OA\Get(
+     *     path="/api/employees/{id}",
+     *     operationId="getEmployeeById",
+     *     tags={"Empleados"},
+     *     summary="Obtener un empleado por ID",
+     *     description="Devuelve un empleado y sus detalles de departamento y rol.",
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         required=true,
+     *         description="ID del empleado",
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Empleado encontrado",
+     *         @OA\JsonContent(type="object",
+     *             @OA\Property(property="id", type="integer", example=1),
+     *             @OA\Property(property="name", type="string", example="Juan Pérez"),
+     *             @OA\Property(property="email", type="string", example="juan.perez@example.com"),
+     *             @OA\Property(property="position", type="string", example="Gerente"),
+     *             @OA\Property(property="salary", type="number", example=55000),
+     *             @OA\Property(property="hire_date", type="string", format="date", example="2023-08-01"),
+     *             @OA\Property(property="department_id", type="integer", example=1),
+     *             @OA\Property(property="role_id", type="integer", example=2)
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Empleado no encontrado",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Empleado no encontrado"),
+     *             @OA\Property(property="status", type="integer", example=404)
+     *         )
+     *     )
+     * )
+     */
+
     public function show($id)
     {
         $employee = Employee::with('department', 'role')->find($id);
@@ -69,6 +234,72 @@ class EmployeeController extends Controller
 
         return response()->json($employee, 200);
     }
+
+    /**
+     * @OA\Put(
+     *     path="/api/employees/{id}",
+     *     tags={"Empleados"},
+     *     summary="Actualizar un empleado",
+     *     description="Actualiza los detalles de un empleado existente.",
+     *     operationId="updateEmployee",
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         description="ID del empleado a actualizar",
+     *         required=true,
+     *         @OA\Schema(
+     *             type="integer"
+     *         )
+     *     ),
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(property="name", type="string", example="Juan Pérez"),
+     *             @OA\Property(property="email", type="string", example="juan.perez@example.com"),
+     *             @OA\Property(property="position", type="string", example="Gerente"),
+     *             @OA\Property(property="salary", type="number", example="55000"),
+     *             @OA\Property(property="hire_date", type="string", format="date", example="2023-08-01"),
+     *             @OA\Property(property="department_id", type="integer", example=1),
+     *             @OA\Property(property="role_id", type="integer", example=2)
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Empleado actualizado con éxito",
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(property="id", type="integer", example=1),
+     *             @OA\Property(property="name", type="string", example="Juan Pérez"),
+     *             @OA\Property(property="email", type="string", example="juan.perez@example.com"),
+     *             @OA\Property(property="position", type="string", example="Gerente"),
+     *             @OA\Property(property="salary", type="number", example=55000),
+     *             @OA\Property(property="hire_date", type="string", format="date", example="2023-08-01"),
+     *             @OA\Property(property="department_id", type="integer", example=1),
+     *             @OA\Property(property="role_id", type="integer", example=2)
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Empleado no encontrado",
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(property="message", type="string", example="Empleado no encontrado"),
+     *             @OA\Property(property="status", type="integer", example=404)
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=400,
+     *         description="Error en la validación de datos",
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(property="message", type="string", example="Error en la validación de datos"),
+     *             @OA\Property(property="errors", type="object"),
+     *             @OA\Property(property="status", type="integer", example=400)
+     *         )
+     *     )
+     * )
+     */
 
     public function update(Request $request, $id)
     {
@@ -107,11 +338,47 @@ class EmployeeController extends Controller
         $employee->update($request->all());
         return response()->json($employee, 200);
     }
-
-    public function destroy($id){
+    /**
+     * @OA\Delete(
+     *     path="/api/employees/{id}",
+     *     tags={"Empleados"},
+     *     summary="Eliminar un empleado",
+     *     description="Elimina un empleado basado en su ID.",
+     *     operationId="deleteEmployee",
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         description="ID del empleado a eliminar",
+     *         required=true,
+     *         @OA\Schema(
+     *             type="integer"
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Empleado eliminado con éxito",
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(property="message", type="string", example="Empleado eliminado"),
+     *             @OA\Property(property="status", type="string", example="200")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Empleado no encontrado",
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(property="message", type="string", example="Empleado no encontrado"),
+     *             @OA\Property(property="status", type="integer", example=404)
+     *         )
+     *     )
+     * )
+     */
+    public function destroy($id)
+    {
         $employee = Employee::find($id);
 
-        if(!$employee){
+        if (!$employee) {
             $data = [
                 'message' => 'Empleado no encontrado',
                 'status' => 404
@@ -127,6 +394,5 @@ class EmployeeController extends Controller
         ];
 
         return response()->json($data, 200);
-
     }
 }
