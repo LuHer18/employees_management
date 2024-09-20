@@ -105,6 +105,28 @@ class EmployeeController extends Controller
         }
 
         $employee->update($request->all());
-        return response()->json($employee);
+        return response()->json($employee, 200);
+    }
+
+    public function destroy($id){
+        $employee = Employee::find($id);
+
+        if(!$employee){
+            $data = [
+                'message' => 'Empleado no encontrado',
+                'status' => 404
+            ];
+
+            return response()->json($data, 404);
+        }
+
+        $employee->delete();
+        $data = [
+            'message' => 'Empleado eliminado',
+            'status' => '200'
+        ];
+
+        return response()->json($data, 200);
+
     }
 }
