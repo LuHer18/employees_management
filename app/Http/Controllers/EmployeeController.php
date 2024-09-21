@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Employee;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
@@ -119,6 +120,22 @@ class EmployeeController extends Controller
         }
 
         $employees = $query->paginate(10);
+
+        $employees->transform(function ($employee) {
+            return [
+                'id' => $employee->id,
+                'name' => $employee->name,
+                'email' => $employee->email,
+                'position' => $employee->position,
+                'salary' => $employee->salary,
+                'hire_date' => Carbon::parse($employee->hire_date)->format('Y-m-d'), // Solo año, mes, día
+                'department_id' => $employee->department_id,
+                'role_id' => $employee->role_id,
+                'is_above_average' => $employee->is_above_average,
+                'department_name' => $employee->department_name,
+                'role_name' => $employee->role_name,
+            ];
+        });
 
         return response()->json($employees, 200);
     }
@@ -260,8 +277,21 @@ class EmployeeController extends Controller
 
             return response()->json($data, 404);
         }
+        $response = [
+            'id' => $employee->id,
+            'name' => $employee->name,
+            'email' => $employee->email,
+            'position' => $employee->position,
+            'salary' => $employee->salary,
+            'hire_date' => Carbon::parse($employee->hire_date)->format('Y-m-d'), // Solo año, mes, día
+            'department_id' => $employee->department_id,
+            'role_id' => $employee->role_id,
+            'is_above_average' => $employee->is_above_average,
+            'department_name' => $employee->department_name,
+            'role_name' => $employee->role_name,
+        ];
 
-        return response()->json($employee, 200);
+        return response()->json($response, 200);
     }
 
     /**
