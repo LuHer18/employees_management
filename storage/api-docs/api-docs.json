@@ -5,11 +5,6 @@
         "description": "API para la gestión de empleados",
         "version": "1.0.0"
     },
-    "servers": [
-        {
-            "url": "http://127.0.0.1:8000"
-        }
-    ],
     "paths": {
         "/api/employees": {
             "get": {
@@ -70,7 +65,8 @@
                                                     },
                                                     "salary": {
                                                         "type": "number",
-                                                        "example": "50000"
+                                                        "format": "float",
+                                                        "example": 50000
                                                     },
                                                     "hire_date": {
                                                         "type": "string",
@@ -102,6 +98,10 @@
                                                             }
                                                         },
                                                         "type": "object"
+                                                    },
+                                                    "is_above_average": {
+                                                        "type": "boolean",
+                                                        "example": true
                                                     }
                                                 },
                                                 "type": "object"
@@ -311,36 +311,48 @@
                                     "properties": {
                                         "id": {
                                             "type": "integer",
-                                            "example": 1
+                                            "example": 4
                                         },
                                         "name": {
                                             "type": "string",
-                                            "example": "Juan Pérez"
+                                            "example": "John Doe"
                                         },
                                         "email": {
                                             "type": "string",
-                                            "example": "juan.perez@example.com"
+                                            "example": "johndoe@example.com"
                                         },
                                         "position": {
                                             "type": "string",
-                                            "example": "Gerente"
+                                            "example": "Desarrollador Senior"
                                         },
                                         "salary": {
                                             "type": "number",
-                                            "example": 55000
+                                            "example": 50000.5
                                         },
                                         "hire_date": {
                                             "type": "string",
                                             "format": "date",
-                                            "example": "2023-08-01"
+                                            "example": "2024-09-15"
                                         },
                                         "department_id": {
                                             "type": "integer",
-                                            "example": 1
+                                            "example": 3
                                         },
                                         "role_id": {
                                             "type": "integer",
                                             "example": 2
+                                        },
+                                        "is_above_average": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "department_name": {
+                                            "type": "string",
+                                            "example": "Sales"
+                                        },
+                                        "role_name": {
+                                            "type": "string",
+                                            "example": "Employee"
                                         }
                                     },
                                     "type": "object"

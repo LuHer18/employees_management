@@ -13,7 +13,7 @@ use Illuminate\Support\Facades\Validator;
  *     version="1.0.0",
  *     description="API para la gestión de empleados"
  * )
- * @OA\Server(url="http://127.0.0.1:8000")
+ *
  */
 
 
@@ -63,7 +63,7 @@ class EmployeeController extends Controller
      *                     @OA\Property(property="name", type="string", example="John Doe"),
      *                     @OA\Property(property="email", type="string", example="john.doe@example.com"),
      *                     @OA\Property(property="position", type="string", example="Desarrollador"),
-     *                     @OA\Property(property="salary", type="number", example="50000"),
+     *                     @OA\Property(property="salary", type="number", format="float", example=50000.00),
      *                     @OA\Property(property="hire_date", type="string", format="date", example="2023-09-01"),
      *                     @OA\Property(property="department", type="object",
      *                         @OA\Property(property="id", type="integer", example=1),
@@ -72,7 +72,8 @@ class EmployeeController extends Controller
      *                     @OA\Property(property="role", type="object",
      *                         @OA\Property(property="id", type="integer", example=1),
      *                         @OA\Property(property="name", type="string", example="Manager")
-     *                     )
+     *                     ),
+     *                     @OA\Property(property="is_above_average", type="boolean", example=true)
      *                 )
      *             ),
      *             @OA\Property(property="links", type="object",
@@ -92,6 +93,7 @@ class EmployeeController extends Controller
      * )
      */
 
+
     public function index(Request $request)
     {
         $query = Employee::selectRaw('employees.*,
@@ -103,15 +105,17 @@ class EmployeeController extends Controller
                 END AS is_above_average,
                 departments.name AS department_name,
                 roles.role_name AS role_name')
-                ->leftJoin('departments', 'employees.department_id', '=', 'departments.id')
-                ->leftJoin('roles', 'employees.role_id', '=', 'roles.id');
+            ->leftJoin('departments', 'employees.department_id', '=', 'departments.id')
+            ->leftJoin('roles', 'employees.role_id', '=', 'roles.id');
 
-        if ($request->has('name')) {
-            $query->where('name', 'like', '%' . $request->name . '%');
+        if ($request->filled('name')) {
+            $name = $request->input('name');
+
+            $query->where('employees.name', 'like', '%' . addcslashes($name, '%_') . '%');
         }
 
-        if ($request->has('department_id')) {
-            $query->where('department_id', $request->department_id);
+        if ($request->filled('department_id')) {
+            $query->where('employees.department_id', $request->department_id);
         }
 
         $employees = $query->paginate(10);
@@ -209,14 +213,17 @@ class EmployeeController extends Controller
      *         response=200,
      *         description="Empleado encontrado",
      *         @OA\JsonContent(type="object",
-     *             @OA\Property(property="id", type="integer", example=1),
-     *             @OA\Property(property="name", type="string", example="Juan Pérez"),
-     *             @OA\Property(property="email", type="string", example="juan.perez@example.com"),
-     *             @OA\Property(property="position", type="string", example="Gerente"),
-     *             @OA\Property(property="salary", type="number", example=55000),
-     *             @OA\Property(property="hire_date", type="string", format="date", example="2023-08-01"),
-     *             @OA\Property(property="department_id", type="integer", example=1),
-     *             @OA\Property(property="role_id", type="integer", example=2)
+     *             @OA\Property(property="id", type="integer", example=4),
+     *             @OA\Property(property="name", type="string", example="John Doe"),
+     *             @OA\Property(property="email", type="string", example="johndoe@example.com"),
+     *             @OA\Property(property="position", type="string", example="Desarrollador Senior"),
+     *             @OA\Property(property="salary", type="number", example=50000.5),
+     *             @OA\Property(property="hire_date", type="string", format="date", example="2024-09-15"),
+     *             @OA\Property(property="department_id", type="integer", example=3),
+     *             @OA\Property(property="role_id", type="integer", example=2),
+     *             @OA\Property(property="is_above_average", type="boolean", example=true),
+     *             @OA\Property(property="department_name", type="string", example="Sales"),
+     *             @OA\Property(property="role_name", type="string", example="Employee")
      *         )
      *     ),
      *     @OA\Response(
@@ -229,6 +236,7 @@ class EmployeeController extends Controller
      *     )
      * )
      */
+
 
     public function show($id)
     {
